@@ -1,0 +1,19 @@
+<% if tassign = Tassign.find_by(user_id: @tconnection.user_id, status_id: status_id) %>
+  <span class="label label-info">
+    Assigned to <%= tassign.account.name %> by <%= tassign.assigner.name %>
+  </span>
+<% end %>
+
+<a class="btn btn-small" onclick="$(this).next().show(); $(this).hide(); $(this).prev().hide();"><%= tassign ? 'Reassign' : 'Assign' %></a>
+
+<% form_tag "/tassigns/#{status_id}", :class => 'form-inline', :style => 'display: none', :remote => true do %>
+  <%= hidden_field_tag :user_id, :value => @tconnection.user_id %>
+
+  <div class="input-prepend">
+    <span class="add-on">Assign to</span>
+    <%= select_tag :account_id, :selected => (tassign.account_id if tassign), :options => [['(nobody)','']]+Tconnection.where(user_id: @tconnection.user_id).map { |tconnection| [tconnection.account.name, tconnection.account_id] } %>
+  </div>
+
+  <button type="submit" class="btn btn-small" onclick="$(this).after(' <i class=\'icon-spin icon-refresh\'></i>')" class="btn">Assign</button>
+<% end %>
+  

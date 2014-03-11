@@ -1,0 +1,128 @@
+<div class="modal-header">
+  <a class="close" data-dismiss="modal" >&times;</a>
+  <h3><img style="position: relative; top: 1px" src="/images/twitter.png" /> <%=@tstatus.user.name%> (<%=@tstatus.user.screen_name%>)</h3>
+</div>
+
+<style>
+  .file-option { display: inline-block; width: 80px }
+</style>
+
+<% form_tag (@tstatus.new_record? ? '/tstatuses/new' : "/tstatuses/#{@tstatus.id}/edit"), :class => 'form-horizontal', :multipart => true do %>
+
+  <div class="modal-body">
+
+    <input type="hidden" name="user_id" value="<%=@tconnection.user_id%>" />    
+
+    <% if !@tstatus.errors.empty? %>
+      <div class="alert alert-error">
+        <strong>Oh snap!</strong> There were some problems with your tweet:
+        <ul style="margin-top: 6px">
+          <% @tstatus.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <% if defined? retweet and retweet %>
+      <input type="hidden" name="retweet" value="true" />
+
+      <div class="control-group">
+        <label class="control-label">Tweet</label>
+        <div class="controls">
+          <%= hidden_field_tag :retweeted_status_id, :class => 'statusid', :value => @tstatus.retweeted_status_id %>
+          <div class="input-xlarge"></div>
+        </div>
+      </div>
+
+    <% else %>
+
+      <div class="control-group">
+        <label for="textarea" class="control-label">Status</label>
+        <div class="controls">
+          <%= text_area_tag :text, :class => "input-xlarge", :rows => 3, :id => 'tweet-text', :value => @tstatus.text %>
+          <script>
+            $(function() {
+              function doCount() {
+                var x = $('#tweet-text').val();
+                var y = x.replace(/\S+\.\S+/g, "http://t.co/twentych123");
+                var remaining = 140 - y.length;
+                if ($('#photo').val().length > 0)
+                  remaining -= 23
+                $('#remaining').html(remaining);
+                if (remaining < 0) {
+                  console.log('disabled')
+                  $('#remaining').css('color','red')
+                  $('button#submit').attr('disabled','disabled');
+                } else {
+                  $('#remaining').css('color','black')
+                  $('button#submit').removeAttr('disabled');
+                }
+              }
+              $('#tweet-text').bind('keydown keyup keypress',doCount);
+              $('#photo').bind('change',doCount);
+              $('#tweet-text').bind('focus paste', function(){setTimeout(doCount, 10);})
+              $('#tweet-text').keypress();
+            });
+          </script>
+          <div><span style="color: #999">Links will appear shortened </span><span id="remaining"></span></div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Image</label>
+        <div class="controls">
+          <% if !@tstatus.persisted? or !@tstatus.photo %>
+            <%= file_field_tag :photo, :class => "input-xlarge", :id => 'photo' %>
+          <% else  %>
+            <img class="thumb" src="<%=@tstatus.photo.url%>" />
+            <div>
+              <span class="file-option">Replace</span> <%= file_field_tag :photo, :class => "input-xlarge", :id => 'photo' %>  
+            </div>
+            <div>
+              <span class="file-option">Remove</span> <%= check_box_tag :remove_photo %>
+            </div>
+          <% end %>
+        </div>
+      </div>            
+
+      <% if @tstatus.in_reply_to_status_id %>
+        <div class="control-group">
+          <label class="control-label">In reply to</label>
+          <div class="controls">
+            <%= hidden_field_tag :in_reply_to_status_id, :class => 'statusid', :value => @tstatus.in_reply_to_status_id %>
+            <div class="input-xlarge"></div>
+          </div>
+        </div>
+      <% end %>
+
+    <% end %>
+
+    <div class="control-group">
+      <label class="control-label">Send <% if @tconnection.permissions == 2 %>at<% end%></label>
+      <div class="controls">
+        <% if [0,1].include? @tconnection.permissions %>
+          <label class="radio">
+            <%= radio_button_tag :send_when, :value => 'now', :checked => @tstatus.send_now %>
+            Now
+          </label>
+          <label class="radio">
+            <%= radio_button_tag :send_when, :value => 'later', :checked => @tstatus.zend_at %>
+            Later on
+          </label>          
+        <% end %>
+        <div class="datetime">
+          <%= datetime_select_tags :zend_at, :value => (@tstatus.zend_at ? @tstatus.zend_at.in_time_zone : (Time.zone.now + 1.minute)) %>
+          <p class="help-block"><%= current_account.time_zone %> <%= 'time' unless current_account.time_zone.include?('Time') %></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button data-submit-text="<%= @tstatus.new_record? ? 'Working...' : 'Saving...' %>" id="submit" class="btn btn-primary" type="submit">
+      <%= @tstatus.new_record? ? 'Send/schedule' : 'Save' %>
+    </button>
+    <a href="#" class="btn" data-dismiss="modal" >Close</a>
+  </div>
+<% end %>

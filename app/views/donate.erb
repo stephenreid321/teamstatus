@@ -1,0 +1,39 @@
+  <style>.donate-div p { font-size: 16px }</style>
+  
+<div class="row-fluid">
+
+  <div class="span2">
+    <img src="/images/me.jpg" style="width: 100%" />
+  </div>
+  <div class="span8 donate-div">
+    <h2>Hi, I'm Stephen Reid, the creator of TeamStatus.</h2>
+    <p>
+      I live in London and work as a freelance web developer.
+      I created TeamStatus as a free alternative to Hootsuite (where 5-person team account costs over £500/year).
+    </p>
+    <p>
+      If you appreciate TeamStatus (and are enjoying saving hundreds of pounds a year), you're very welcome to make a donation!
+    </p>
+    <div style="margin: 20px">
+      <h3><img src="/images/gocardless.png" style="width:32px"> GoCardless</h3>
+      <p>
+        <%
+        {5 => 'https://dashboard.gocardless.com/api/template_plans/0HTDJATS3Q/paylink',
+          10 => 'https://dashboard.gocardless.com/api/template_plans/0HTDTGEM4R/paylink',
+          20 => 'https://dashboard.gocardless.com/api/template_plans/0HTDSAYG0V/paylink',
+          50 => 'https://dashboard.gocardless.com/api/template_plans/0HTD4S34GS/paylink'}.each { |amount, link| %>
+          <a class="badge" style="font-size: 48px; line-height: 100%" href="<%=link%>">£<%=amount%></a>
+        <% } %>
+      </p>
+      <h3><img src="/images/paypal.png" style="width:32px">  Paypal</h3>  
+      <p style="font-size: 22px">
+        <a class="badge" style="font-size: 24px; line-height: 100%" href="https://www.paypal.com/us/cgi-bin/webscr?cmd=_send-money&nav=1&email=postscript07@gmail.com">Send a payment to postscript07@gmail.com</a>
+      </p>
+    </div>
+    <p>
+      All amounts, no matter how small, are gratefully received. Many thanks!
+    </p>
+    <p style="text-align: right">&mdash; Stephen Reid (<a href="http://twitter.com/wordsandwriting">@wordsandwriting</a>)</p>
+  </div>
+
+</div>

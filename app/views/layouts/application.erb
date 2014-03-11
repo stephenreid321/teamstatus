@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+  <head> 
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TeamStatus</title>   
+
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css" type="text/css">
+    <style>body { padding-top: 50px; padding-bottom: 10px }</style>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.min.css" type="text/css">
+    <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+    <link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <style>
+      a > i { color: black !important; text-decoration: none !important }
+      .restore-opacity:hover { opacity: 1 !important }
+      .thumb { width: 150px }
+      select[name*=day], select[name*=month], select[name*=year], select[name*=hour], select[name*=min] { display:inline; width: auto } 
+    </style>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/javascripts/jquery-1.8.3.min.js"><\/script>')</script>	
+    <script src="/javascripts/jquery-ujs.js"></script>
+    <script src="/jquery-ui/js/jquery-ui-1.10.0.custom.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script>
+      $(function() {
+
+        $(document).ajaxError(function() {
+          alert('Uh oh, there was a problem communicating with the server.\nGive it another shot, try signing in again or email <%=ENV['GMAIL_USERNAME']%> if you keep having problems.');
+        });
+
+        $(document).on('submit', '#modal form', function() {
+          $('button[data-submit-text]').attr('disabled', 'disabled');
+          $('button[data-submit-text]').html($('button[data-submit-text]').attr('data-submit-text'));
+        });
+
+      });
+    </script>
+
+    <meta property="og:title" content="TeamStatus" />
+    <meta property="og:description" content="Multiple people using a single Twitter account or Facebook page? Use TeamStatus to keep track of who's posting what">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://<%=ENV['DOMAIN']%>" />
+    <meta property="og:image" content="http://<%=ENV['DOMAIN']%>/images/teamstatus.png" />        
+
+  </head>
+  <body>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id))
+          return;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "//connect.facebook.net/en_GB/all.js#xfbml=1&appId=359714314050039";
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));</script>   
+
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+
+          <a href="/" class="brand" style="font-family: 'Lobster'">TeamStatus</a>
+
+
+
+          <div class="nav-collapse">
+            <ul class="nav pull-right">
+              <% if current_account %>
+                <li>
+                  <a data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/accounts/edit')">
+                    Account options
+                  </a>
+                </li>             
+                <li>
+                  <a href="/accounts/sign_out">
+                    Sign out
+                  </a>
+                </li>             
+              <% else %>
+                <li>
+                  <a data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/accounts/new')">
+                    Sign up
+                  </a>
+                </li>              
+                <li>
+                  <a data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/accounts/sign_in')">
+                    Sign in
+                  </a>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </div>  
+
+    <% if current_account %>
+      <div style="text-align: center; margin-bottom: 10px" class="alert">
+        Find TeamStatus useful? Please consider making a <a href="/donate">donation</a>.
+      </div>
+    <% end %>
+
+
+    <div class="container-fluid">
+
+      <div style="z-index: 1040; width: 40%; margin-left: -20%; left: 50%; position: absolute; margin-top: -40px">
+        <% {:error => 'alert-error', :warning => '', :notice => 'alert-info'}.each { |k,v| %>
+          <% if flash[k] %>
+            <div id="app-flash" class="fade in alert <%=v%>" style="box-shadow: 1px 1px 3px #ccc;">
+              <button data-dismiss="alert" class="close" type="button">×</button>
+              <%=flash[k].html_safe %>
+            </div>
+          <% end %>        
+        <% } %>       
+      </div>
+      <script>
+        $(function() {
+          $(".alert").alert()
+          window.setTimeout(function() {
+            $("#app-flash .alert").alert('close');
+          }, 3000);
+        });
+      </script>      
+
+      <%= yield %>
+
+      <hr style="margin: 10px 0" />
+
+      <style>
+        @media (min-width:768px){
+          body .modal {
+            width: 66%; /* desired relative width */
+            margin-left:-33%; /* -(width/2) */
+          }
+        }   
+        @media (max-width:767px){
+          body .modal {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0 !important;
+            top: 0 !important;
+            margin: 0 !important;
+            border: 0 !important;
+          }
+        }           
+      </style>
+      <div id="modal" class="fade modal hide"><%=@modal%></div>  
+      <script>
+        $(function() {
+          $('#modal').on('hidden', function() {
+            $(this).html('')
+          });
+
+          $('#modal').on('shown', function() {
+            $('#modal .statusid').each(function() {
+              var input = this;
+              $(input).next().html('');
+              if ($(input).val().length > 0) {
+                $.getJSON('https://api.twitter.com/1/statuses/oembed.json?callback=?&id=' + $(input).val(), function(data) {
+                  $(input).next().html(data.html);
+                });
+              }
+            });
+          });
+<% if @modal  %>
+            $('#modal').modal('show');
+<% end %>
+        });
+      </script>      
+
+      <footer style="color: #999">
+        <div class="row-fluid">
+          <div class="span6">          
+            <span style="position: relative; top: -4px; ">   
+              Created by <a target="_blank" href="http://twitter.com/wordsandwriting">@wordsandwriting</a>
+            </span>
+            <a href="https://twitter.com/wordsandwriting" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @wordsandwriting</a>
+            <script>!function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0], p = /^http:/.test(d.location) ? 'http' : 'https';
+                if (!d.getElementById(id)) {
+                  js = d.createElement(s);
+                  js.id = id;
+                  js.src = p + '://platform.twitter.com/widgets.js';
+                  fjs.parentNode.insertBefore(js, fjs);
+                }
+              }(document, 'script', 'twitter-wjs');</script>
+            <iframe src="http://ghbtns.com/github-btn.html?user=wordsandwriting&repo=teamstatus&type=fork"
+                    allowtransparency="true" frameborder="0" scrolling="0" width="53" height="20"></iframe>              
+          </div>      
+        </div>
+      </footer>    
+
+    </div>
+
+  </body>
+</html>
+

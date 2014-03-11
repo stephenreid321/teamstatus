@@ -1,0 +1,26 @@
+
+<div class="well">
+  <h3><img src="/images/facebook.png" /> <%=@fconnection.user['name']%> &rsaquo; Sent</h3>
+</div>
+
+<% if @fstatuses.empty? %>
+  <div class="alert"><strong>Well fancy that.</strong> You haven't posted anything yet.</div>
+<% else %>
+  <table class="table">
+    <% @fstatuses.each do |fstatus|  %>
+      <%= partial :'fpanels/fstatus', :locals => {:post => fstatus} %>
+    <% end%>
+  </table>
+
+  <% if @n == @fstatuses.count %>
+    <a class="btn btn-large" style="width: 90%" href="javascript:;" onclick="$('#tab').load('/fpanels/<%=@fconnection.user_id%>/sent?n=<%=@n+@dn%>');$(this).html('Grabbing more posts...');$(this).addClass('disabled');">Show more posts</a>
+  <% end %>
+
+<% end %>
+
+
+
+
+
+
+

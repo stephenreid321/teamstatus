@@ -1,0 +1,23 @@
+
+<div class="well">
+  <h3><img src="/images/twitter.png" /> <%=@tconnection.user.name%> &rsaquo; Scheduled</h3>
+</div>
+
+<% if @tstatuses.empty? %>
+  <div class="alert"><strong>Well fancy that.</strong> You haven't scheduled anything yet.</div>
+<% else %>
+  <table class="table">
+    <% @tstatuses.each do |tstatus|  %>
+      <%= partial :'tpanels/tstatus', :locals => {:status => tstatus} %>
+    <% end %>
+  </table>
+  
+  
+  
+  
+  
+<% end %>
+
+
+
+

@@ -1,0 +1,27 @@
+
+<table style="width: 100%">
+  <tr>
+    <td style="padding-right: 10px; width: 32px;">
+      <img style="cursor:move; width: 32px; border-radius: 4px" title="Drag to re-order" src="<%=tconnection.user.profile_image_url%>">
+    </td>
+    <td style="vertical-align: middle; ">
+
+      <div style="float: right">
+        <a title="New tweet" class="btn" data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/tstatuses/new?user_id=<%=tconnection.user_id%>')" ><i class="icon-edit"></i></a>
+        <a title="Grant access" class="btn" data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/tconnections/access?user_id=<%=tconnection.user_id%>')" ><i class="icon-key"></i></a>
+      </div>  
+
+      <strong class="mimic-nav-header" style="display:block"><%=tconnection.user.name%> (<%=tconnection.user.screen_name%>)</strong>        
+      <a href="/tconnections/<%=tconnection.user_id%>/destroy" class="restore-opacity" style="font-size: 0.9em; font-weight:bold; opacity: 0.33">          
+        Sign out
+        <img style="vertical-align: top" src="/images/twitter.png" alt="Twitter account" />
+      </a>                                
+    </td>
+  </tr>
+</table>
+
+<ul class="nav nav-list panels">
+  <% [['sent', 'Sent'], ['scheduled', 'Scheduled'], ['received', 'Mentions'], ['search', 'Search'], ['assigned', 'Assigned to you']].each { |panel, label| %>
+    <li><a data-connection-type="t" data-user-id="<%=tconnection.user_id%>" data-panel="<%=panel%>" href="javascript:;"><%=label%></a></li>
+  <% } %>
+</ul>

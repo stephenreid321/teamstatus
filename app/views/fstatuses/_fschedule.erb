@@ -1,0 +1,120 @@
+<div class="modal-header">
+  <a class="close" data-dismiss="modal" >&times;</a>
+  <h3><img style="position: relative; top: 1px" src="/images/facebook.png" /> <%=@fstatus.user['name']%></h3>
+</div>
+
+<style>
+  .file-option { display: inline-block; width: 80px }
+</style>
+
+<% form_tag (@fstatus.new_record? ? '/fstatuses/new' : "/fstatuses/#{@fstatus.id}/edit"), :class => 'form-horizontal', :multipart => true do %>
+
+  <div class="modal-body">
+
+    <input type="hidden" name="user_id" value="<%=@fconnection.user_id%>" />
+
+    <% if !@fstatus.errors.empty? %>
+      <div class="alert alert-error">
+        <strong>Oh snap!</strong> There were some problems with your post:
+        <ul style="margin-top: 6px">
+          <% @fstatus.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="control-group">
+      <label class="control-label">Message</label>
+      <div class="controls">
+        <%= text_area_tag :message, :class => "input-xlarge", :rows => 3, :value => @fstatus.message %>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label">Attach</label>
+      <div class="controls">
+        <a href="javascript:;" onclick="$('#photo').val('');$('#photo-div').hide();$('#link, #link-preview-cg').show();" class="btn">Link</a>
+        or
+        <a href="javascript:;" onclick="$('#link').val('').blur();$('#link, #link-preview-cg').hide();$('#photo-div').show();" class="btn">Photo</a>
+        <div style="margin-top: 10px">
+          <%= text_field_tag :link, :class => "input-xlarge", :value => @fstatus.link, :id => 'link', :placeholder => 'Link URL', :style => 'display: none' %>
+          <div id="photo-div" style="display: none">
+            <% if !@fstatus.persisted? or !@fstatus.photo %>
+              <%= file_field_tag :photo, :class => "input-xlarge", :id => 'photo' %>
+            <% else  %>
+              <img class="thumb" src="<%=@fstatus.photo.url%>" />
+              <div>
+                <span class="file-option">Replace</span> <%= file_field_tag :photo, :class => "input-xlarge", :id => 'photo' %>  
+              </div>
+              <div>
+                <span class="file-option">Remove</span> <%= check_box_tag :remove_photo %>
+              </div>
+            <% end %>
+          </div>
+          <script>
+            $(function() {
+              if ($('img.thumb').length > 0) {
+                $('#photo-div').show();
+              }
+            });
+          </script>
+        </div>
+      </div>
+    </div>   
+
+
+    <script type="text/javascript">
+      $(function() {        
+        $('#link').blur(function() {          
+          if ($('#link').val().length > 0) {
+            $('#link-preview').html('<i class="icon-refresh icon-spin"></i>'); 
+            $('#link-preview').load('/fpanels/flink?'+$("#link").serialize());
+          } else { 
+            $('#link-preview').html('<span style="opacity:0.3">Enter a URL and click away to see a preview</span>');
+          }       
+        });            
+                    
+        if ($('#link').val().length > 0) {
+          $('#link, #link-preview-cg').show();
+        }
+        $('#link').blur();
+      });
+    </script>
+    <div class="control-group" id="link-preview-cg" style="display: none">
+      <label class="control-label"></label>
+      <div class="controls">
+        <div id="link-preview">          
+        </div>  
+      </div>
+    </div>    
+
+    <div class="control-group">
+      <label class="control-label">Send <% if @fconnection.permissions == 2 %>at<% end%></label>
+      <div class="controls">
+        <% if [0,1].include? @fconnection.permissions %>
+          <label class="radio">
+            <%= radio_button_tag :send_when, :value => 'now', :checked => @fstatus.send_now %>
+            Now
+          </label>
+          <label class="radio">
+            <%= radio_button_tag :send_when, :value => 'later', :checked => @fstatus.zend_at %>
+            Later on
+          </label>
+        <% end %>
+        <div class="datetime">
+          <%= datetime_select_tags :zend_at, :value => (@fstatus.zend_at ? @fstatus.zend_at.in_time_zone : (Time.zone.now + 1.minute)) %>
+          <p class="help-block"><%= current_account.time_zone %> <%= 'time' unless current_account.time_zone.include?('Time') %></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button data-submit-text="<%= @fstatus.new_record? ? 'Working...' : 'Saving...' %>" id="submit" class="btn btn-primary" type="submit">
+      <%= @fstatus.new_record? ? 'Send/schedule' : 'Save' %>
+    </button>
+    <a href="#" class="btn" data-dismiss="modal" >Close</a>
+  </div>
+<% end %>
+

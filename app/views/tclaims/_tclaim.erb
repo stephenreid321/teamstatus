@@ -1,0 +1,13 @@
+<% if account = Tclaim.find_by(status_id: status.id.to_s).try(:account) %>
+  <span class="label label-info">
+    <%= status.retweeted_status ? 'Retweeted' : 'Tweeted' %> by <%= account.name %>
+  </span>
+  <% if account.id == current_account.id %>
+    <a class="btn btn-small restore-opacity" style="opacity: 0.33" data-remote="true" href="/tclaims/<%=status.id%>/destroy?user_id=<%=@tconnection.user_id%>">I didn't <%= status.retweeted_status ? 'retweet' : 'tweet' %> this</a>
+  <% end %>
+<% else %>
+  <span class="label">
+    <%= status.retweeted_status ? 'Retweeted' : 'Tweeted' %> by ?
+  </span>
+  <a class="btn btn-small" data-remote="true" href="/tclaims/<%=status.id%>?user_id=<%=@tconnection.user_id%>">I <%= status.retweeted_status ? 'retweeted' : 'tweeted' %> this</a>
+<% end %>

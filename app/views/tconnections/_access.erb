@@ -1,0 +1,71 @@
+<div class="modal-header">
+  <a class="close" data-dismiss="modal" >&times;</a>
+  <h3><img style="position: relative; top: 1px" src="/images/twitter.png" /> People with access to <%=@tconnection.user.name%> (<%=@tconnection.user.screen_name%>)</h3>
+</div>
+
+<div class="modal-body">
+
+  <% if flash[:notice] %>
+    <div class="alert alert-info">
+      <%=flash[:notice].html_safe %>
+    </div>      
+  <% end %>    
+
+  <table class="table table-condensed">  
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Permissions</th>
+        <% if @tconnection.permissions == 0 %>
+          <th>Revoke access</th>
+        <% end %>
+      </tr>
+    </thead>
+    <% Tconnection.where(user_id: @tconnection.user_id).order_by(:permissions.asc).each { |tconnection| %>
+      <tr>
+        <td><%= tconnection.account == current_account ? 'You' : tconnection.account.name %> (<%= tconnection.account.email%>)</td>
+        <td>
+          <% if @tconnection.permissions == 0 and tconnection.account != current_account %>
+            <% form_tag "/tconnections/change_permissions", :class => 'form-inline', :style => 'margin: 0', :remote => true do %> 
+              <%= hidden_field_tag :user_id, :value => @tconnection.user_id %>
+              <%= hidden_field_tag :account_id, :value => tconnection.account_id %>
+              <%= select_tag :permissions, :options => Tconnection.permissions.to_a.map(&:reverse), :selected => tconnection.permissions, :onchange => '$(this.form).submit()' %>
+            <% end %>  
+          <% else %>
+            <%=Tconnection.permissions[tconnection.permissions]%>
+          <% end %>
+        </td>
+        <% if @tconnection.permissions == 0 %>
+          <td>
+            <% unless tconnection.account == current_account %>
+              <% form_tag "/tconnections/revoke", :class => 'form-inline', :style => 'margin: 0', :remote => true do %> 
+                <%= hidden_field_tag :user_id, :value => @tconnection.user_id %>
+                <%= hidden_field_tag :account_id, :value => tconnection.account_id %>
+                <button title="Revoke access" type="submit" class="btn"><i class="icon-remove"></i></button>
+              <% end %>
+            <% end %>
+          </td>
+        <% end %>
+      </tr>
+    <% } %>
+  </table>
+
+  <% if @tconnection.permissions == 0 %>
+
+    <% form_tag "/tconnections/grant", :class => 'form-inline', :remote => true do %>
+      <fieldset>
+        <legend>Grant access</legend>
+        <% if flash[:error] %>
+          <div class="alert alert-error">
+            <%=flash[:error].html_safe %>
+          </div>      
+        <% end %>  
+
+        <%= hidden_field_tag :user_id, :value => @tconnection.user_id %>
+        <%= text_field_tag :email, :placeholder => 'Email address' %>
+        <button type="submit" onclick="$(this).after(' <i class=\'icon-spin icon-refresh\'></i>')" class="btn">Grant access</button>
+      <% end %>
+    </fieldset>
+  <% end %>
+
+</div>

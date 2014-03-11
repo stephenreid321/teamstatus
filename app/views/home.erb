@@ -1,0 +1,93 @@
+
+<div class="row-fluid">
+
+  <div class="span4">
+
+    <script>
+      $(function() {
+        $( "#sortable" ).sortable({
+          update: function(event, ui) {
+            var order = $('#sortable').sortable('serialize'); 
+            console.log(order);
+            $.post('/order',order)
+          },
+          cancel: "#sortable > li.nav-header"
+        });
+        $( "#sortable" ).disableSelection();
+        $('[data-panel]').click(function() {
+          $('#tab').load('/'+$(this).attr('data-connection-type')+'panels/'+$(this).attr('data-user-id')+'/'+$(this).attr('data-panel'))
+          $('[data-panel]').removeClass('mimic-nav-list-active');
+          $(this).addClass('mimic-nav-list-active');
+        });        
+      });
+    </script>    
+    <style>
+      .mimic-nav-header {
+        color: #999999;
+        font-size: 11px;
+        font-weight: bold;
+        line-height: 18px;
+        text-transform: uppercase;
+      }     
+      .mimic-nav-list-active {
+        background-color: #0088CC !important;
+        color: #FFFFFF !important;
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
+      }
+      .panels.nav-list li { margin: 0 -15px }
+    </style>
+
+    <div class="well" style="padding: 0;">
+      <ul id="sortable" class="nav nav-list">
+        <% (current_account.tconnections(true) + current_account.fconnections(true)).sort_by { |connection|
+          connection.order or -1
+        }.each { |connection| %>
+          <li id="connections-<%=connection.id%><%=connection.class.to_s.downcase[0..0]%>" style="margin-top: 9px">
+            <%= partial :"#{connection.class.to_s.downcase.pluralize}/#{connection.class.to_s.downcase}", :locals => {:"#{connection.class.to_s.downcase}" => connection} %>
+          </li>
+        <% } %>
+        <li style="background: #eee" class="nav-header">
+          <style>
+            #add-account img { vertical-align: top }
+          </style>
+          <div id="add-account">
+            Add an account
+            <a href="/tconnections/new"><img src="/images/twitter.png" title="Add a Twitter account" /></a>
+            <a href="/fconnections/new"><img src="/images/facebook.png" title="Add a Facebook account" /></a>
+          </div>              
+        </li>        
+      </ul>
+    </div>
+
+    <script>
+      $(function() {
+        $('a[data-panel]').click(function () {
+          $('#tab').html('<div class="well"><h3>Loading...</h3></div>');        
+        });
+<% if params[:panel] %>
+      $("a[data-connection-type=<%=params[:connection_type]%>][data-user-id=<%=params[:user_id]%>][data-panel='<%=params[:panel]%>']").click();
+<% else %>                   
+      $('a[data-panel]:first').click();
+<% end %>
+  });
+    </script>
+
+  </div>
+
+  <div class="span8">
+    <style>
+      #tab > .well { padding: 0; padding-left: 15px; min-height: 0 }
+      #tab > .well > h3 > img { vertical-align: baseline }
+    </style>
+    <div id="tab">
+      <div style="font-size: 175%; line-height: 150%; font-family: 'Open Sans'">
+        <span style="border-bottom: 3px solid #F6C5F4">&larr; Get started by clicking the
+          <img src="/images/twitter.png" />
+          or
+          <img src="/images/facebook.png" />
+      </div>
+    </div>
+  </div>
+
+</div>
+

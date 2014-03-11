@@ -1,0 +1,15 @@
+
+<table style="width: 100%; margin-top: 10px">
+  <tr>
+    <td style="width: 50px; padding: 0; padding-right: 10px; vertical-align: top; border: 0">
+      <a href="<%=link%>"><img style="width:50px" src="<%=picture%>" /></a>
+    </td>
+    <td style="padding: 0; border: 0">
+      <a style="font-weight:bold" href="<%=link%>"><%=name%></a><br />
+      <div style="color: #999; "><%=Rinku.auto_link(caption).html_safe if caption%></div>
+      <% if description %>
+        <div style="color: #999; margin-top: 5px"><%=description%></div>
+      <% end %>
+    </td>
+  </tr>
+</table>

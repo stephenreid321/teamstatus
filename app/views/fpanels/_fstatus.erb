@@ -1,0 +1,129 @@
+
+<tr id="<%=post['id']%>">
+  <td style="width: 50px; padding-right: 10px; vertical-align: top">
+    <% if post.is_a?(Hash) %>
+      <img src="http://graph.facebook.com/<%=post['from']['id']%>/picture" />
+    <% else %>
+      <img src="http://graph.facebook.com/<%=post.user_id%>/picture" />
+    <% end %>
+  </td>
+  <td>
+
+    <div style="float: right; font-size: 0.95em; margin-right: 10px"> 
+      <% if post.is_a?(Hash) %>
+        <% if post['actions'] %>
+          <a title="<%=Time.zone.parse(post['created_time'])%>" class="restore-opacity" style="color:black; opacity: 0.3;" target="_blank" href="<%=post['actions'].first['link']%>"><%= compact_time_ago Time.zone.parse(post['created_time']) %></a>
+          <% if @fconnection.user_id == post['from']['id'].to_s %>
+            <a class="restore-opacity" style="opacity: 0.3" data-remote="true" data-confirm="Are you sure you want to delete this post?" href="/fpanels/<%=@fconnection.user_id%>/destroy/<%=post['id']%>"><i title="Delete" class="icon-trash"></i></a>
+          <% end %>      
+        <% else %>
+          <span title="<%=Time.zone.parse(post['created_time'])%>" class="restore-opacity" style="opacity: 0.3;"><%= compact_time_ago Time.zone.parse(post['created_time']) %></span>
+        <% end %>
+      <% else %>
+        <span class="restore-opacity" style="opacity: 0.3;">
+          <%= (post.zend_at > Time.now ? "in #{distance_of_time_in_words(Time.now, post.zend_at)}" : "#{time_ago_in_words(post.zend_at)} ago") + " (#{post.zend_at.in_time_zone}) " %>           
+        </span> 
+        <a class="restore-opacity" style="opacity: 0.3" data-remote="true" data-confirm="Are you sure you want to delete this tweet?" href="/fstatuses/<%=post.id%>/destroy"><i title="Delete" class="icon-trash"></i></a>
+        <a class="restore-opacity" style="opacity: 0.3" data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/fstatuses/<%=post.id%>/edit?user_id=<%=@fconnection.user_id%>')" ><i title="Edit" class="icon-edit"></i></a>
+      <% end %>
+    </div>
+
+    <% if post.is_a?(Hash) %>
+      <a style="font-weight:bold" target="_blank" href="http://www.facebook.com/<%=post['from']['id']%>"><%=post['from']['name']%></a>
+    <% else %>
+      <a style="font-weight:bold" target="_blank" href="http://www.facebook.com/<%=post.user_id%>"><%=post.user['name']%></a>
+    <% end %>
+
+    <% if post.is_a?(Hash) %>
+      <%  if post['message']  %>
+        <div style="margin-top: 5px">
+          <%= Rinku.auto_link(post['message'].gsub("\n",'<br />')).html_safe %>
+        </div>
+      <% elsif post['story'] %>
+        <div style="margin-top: 5px">
+          <%= Rinku.auto_link(post['story']).html_safe %>
+        </div>
+      <% end %>
+    <% else %>
+      <div style="margin-top: 5px">
+        <%= Rinku.auto_link(post.message.gsub("\n",'<br />')).html_safe %>
+      </div>
+    <% end %>
+
+    <% if post.is_a?(Hash) %>
+      <% if post['link'] %>
+        <%= partial :'fpanels/flink', :locals => {
+          :link => post['link'],
+          :picture => post['picture'],
+          :name => post['name'], 
+          :caption => post['caption'], 
+          :description => post['description'] 
+        } %>
+      <% end %>
+    <% else %>
+      <% if post.link %>
+        <%= partial :'fpanels/flink', :locals => {
+          :link => post.link,
+          :picture => post.picture,
+          :name => post.name,
+          :caption => post.caption, 
+          :description => post.description
+        } %>
+      <% elsif post.photo %>
+        <img class="thumb" src="<%=post.photo.url%>" />
+      <% end %>
+    <% end %>
+
+    <% if post.is_a?(Hash) %>      
+      <% if ((post['likes'] and post['likes']['count'].to_i > 0) or (post['shares'] and post ['shares']['count'].to_i > 0)) %>
+        <div style="margin-top: 3px">             
+          <%  if (post['likes'] and post['likes']['count'].to_i > 0) %>
+            <img src="/images/icon-thumbs-up.png">
+            <a title="<%= post['likes']['count'] %> like<%='s' if post['likes']['count'].to_i > 1%> " href="http://www.facebook.com/browse/likes?id=<%=post['id'].split('_').last%>" style="color:black;font-weight: bold" target="_blank">
+              <%= post['likes']['count'] %>
+            </a>
+          <% end %>
+          <%  if (post['shares'] and post['shares']['count'].to_i > 0) %>
+            <img src="/images/icon-share.png">
+            <a title="<%= post['shares']['count'] %> share<%='s' if post['shares']['count'].to_i > 1%> " href="http://www.facebook.com/shares/view?id=<%=post['id'].split('_').last%>" style="color:black;font-weight: bold" target="_blank">
+              <%= post['shares']['count'] %>
+            </a>           
+          <% end %>
+        </div>  
+      <% end %>
+    <% end %>
+
+    <div class="fclaim" style="margin-top: 5px; margin-bottom: 5px">
+      <% if post.is_a?(Fstatus) %>      
+        <span class="label label-info">
+          Scheduled by <%=post.account.name %>
+        </span>
+        <% if post.approver %>
+          <span class="label label-success">Approved by <%=post.approver.name %></span>            
+          <% if [0,1].include? @fconnection.permissions %>
+            <a class="btn btn-small restore-opacity" style="opacity: 0.33" data-remote="true" href="/fstatuses/<%=post.id%>/unapprove?user_id=<%=@fconnection.user_id%>">Unapprove</a>
+          <% end %>
+        <% else %>
+          <% if [0,1].include? @fconnection.permissions %>
+            <a class="btn btn-small" data-remote="true" href="/fstatuses/<%=post.id%>/approve?user_id=<%=@fconnection.user_id%>">Approve</a>
+          <% else %>
+            <span class="label label-important">Unapproved</span>
+          <% end %>
+        <% end %>                
+      <% elsif @panel == 'sent' %>
+        <%=partial :'fclaims/fclaim', :locals => {:post => post} %>   
+      <% end %>      
+    </div>   
+
+    <% if post.is_a?(Hash) %>
+      <div data-commentable-id="<%=post['id']%>">
+        <%= partial :'comments/comments', :locals => {:connection_type => 'f', :user_id => @fconnection.user_id, :panel => @panel, :commentable_id => post['id']} %>
+      </div>       
+    <% else %>
+      <div data-commentable-id="<%=post.id%>">
+        <%= partial :'comments/comments', :locals => {:connection_type => 'f', :user_id => @fconnection.user_id, :panel => @panel, :commentable_id => post.id.to_s} %>
+      </div>       
+    <% end %>
+
+  </td>
+</tr>

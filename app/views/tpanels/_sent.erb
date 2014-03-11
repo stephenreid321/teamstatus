@@ -1,0 +1,20 @@
+
+<div class="well">
+  <h3><img src="/images/twitter.png" /> <%=@tconnection.user.name%> &rsaquo; Sent</h3>
+</div>
+
+<% if @tstatuses.empty? %>
+  <div class="alert"><strong>Well fancy that.</strong> You haven't tweeted anything yet.</div>
+<% else %>
+  <table class="table">
+    <% @tstatuses.each do |status| %>    
+      <%= partial :'tpanels/tstatus', :locals => {:status => status} %>   
+    <% end %>
+  </table>
+
+  <% if @n == @tstatuses.count %>
+    <a class="btn btn-large" style="width: 90%" href="javascript:;" onclick="$('#tab').load('/tpanels/<%=@tconnection.user_id%>/sent?n=<%=@n+@dn%>');$(this).html('Grabbing more tweets...');$(this).addClass('disabled');">Show more tweets</a>
+  <% end %>
+
+<% end %>
+

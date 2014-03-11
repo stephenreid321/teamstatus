@@ -1,0 +1,27 @@
+
+<table style="width: 100%">
+  <tr>
+    <td style="padding-right: 10px; width: 32px;">
+      <img style="cursor:move; width: 32px; border-radius: 4px" title="Drag to re-order" src="http://graph.facebook.com/<%=fconnection.user['id']%>/picture">
+    </td>
+    <td style="vertical-align: middle; ">
+
+      <div style="float: right">
+        <a title="New post" class="btn" data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/fstatuses/new?user_id=<%=fconnection.user_id%>')" ><i class="icon-edit"></i></a>
+        <a title="Grant access" class="btn" data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/fconnections/access?user_id=<%=fconnection.user_id%>')" ><i class="icon-key"></i></a>
+      </div>         
+
+      <strong class="mimic-nav-header"  style="display:block"><%=fconnection.user['name']%></strong>       
+      <a href="/fconnections/<%=fconnection.user_id%>/destroy" class="restore-opacity" style="font-size: 0.9em; font-weight:bold; opacity: 0.33">         
+        Sign out
+        <img style="vertical-align: top" src="/images/facebook.png" alt="Facebook account" />
+      </a>                                
+    </td>
+  </tr>
+</table>
+
+<ul class="nav nav-list panels">
+  <% [['sent', 'Sent'],['scheduled', 'Scheduled']].each { |panel, label| %>
+    <li><a data-connection-type="f" data-user-id="<%=fconnection.user_id%>" data-panel="<%=panel%>" href="javascript:;"><%=label%></a></li>
+  <% } %>
+</ul>

@@ -1,0 +1,23 @@
+
+<div class="well">
+  <h3>
+    <img src="/images/twitter.png" /> <%=@tconnection.user.name%> &rsaquo;
+    <form method="get" class="form-inline" style="display: inline" onsubmit="$('#tab').load('/tpanels/<%=@tconnection.user_id%>/search?'+$(this).serialize());$(this).after('&nbsp;<i style=\'vertical-align: middle\' class=\'icon-refresh icon-spin\'></i>');return false">
+      <%= text_field_tag :q, :value => params[:q] %>
+      <button class="btn" type="submit">Search</button>
+    </form>  
+  </h3>
+</div>
+
+<% if @tstatuses  %>
+  <% if @tstatuses.empty? %>
+    <div class="alert"><strong>Well fancy that.</strong> There aren't any search results.</div>
+  <% else %>
+    <table class="table">
+      <% @tstatuses.each do |status| %>    
+        <%= partial :'tpanels/tstatus', :locals => {:status => status} %>   
+      <% end %>
+    </table>
+  <% end %>
+<% end %>
+

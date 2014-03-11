@@ -1,0 +1,116 @@
+<tr id="<%=status.id%>">
+  <td style="width: 50px; padding-right: 5px;">   
+    <a target="_blank" href="http://twitter.com/<%=(status.retweeted_status || status).user.screen_name%>">
+      <img style="width: 100%; border-radius: 5px" src="<%=(status.retweeted_status || status).user.profile_image_url%>">
+    </a>
+  </td>
+  <td>
+
+    <% if status.retweeted_status %>
+      <div style="position: relative">
+        <img style="z-index: -1; position: absolute; top: -7px; right: -7px" src="/images/rt.png" />
+      </div>
+    <% end %>
+
+    <div style="float: right; font-size: 0.95em; margin-right: 10px">  
+      <% if status.is_a?(Tstatus) %>
+        <span class="restore-opacity" style="opacity: 0.3;">
+          <%= (status.zend_at > Time.now ? "in #{distance_of_time_in_words(Time.now, status.zend_at)}" : "#{time_ago_in_words(status.zend_at)} ago") + " (#{status.zend_at.in_time_zone}) " %>           
+        </span> 
+        <a class="restore-opacity" style="opacity: 0.3" data-remote="true" data-confirm="Are you sure you want to delete this tweet?" href="/tstatuses/<%=status.id%>/destroy"><i title="Delete" class="icon-trash"></i></a>
+        <a class="restore-opacity" style="opacity: 0.3" data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/tstatuses/<%=status.id%>/edit?user_id=<%=@tconnection.user_id%>')" ><i title="Edit" class="icon-edit"></i></a>
+      <% else %>          
+        <a class="restore-opacity" style="color:black; opacity: 0.3;" title="<%=status.created_at%>" target="_blank" href="<%="http://twitter.com/#{status.user.screen_name}/status/#{status.id}"%>"><%=compact_time_ago(status.created_at)%></a>
+        <% if @tconnection.user_id == status.user.id.to_s %>
+          <a class="restore-opacity" style="opacity: 0.3" data-remote="true" data-confirm="Are you sure you want to delete this tweet?" href="/tpanels/<%=@tconnection.user_id%>/destroy/<%=status.id%>"><i title="Delete" class="icon-trash"></i></a>
+        <% else %>
+          <a class="restore-opacity" style="opacity: 0.3" title="Retweet" data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/tstatuses/new?user_id=<%=@tconnection.user_id%>&retweet=true&retweeted_status_id=<%=status.id%>')" ><i class="icon-retweet"></i></a>
+        <% end %>
+        <a class="restore-opacity" style="opacity: 0.3" title="Reply" data-toggle="modal" data-target="#modal" href="javascript:;" onclick="$('#modal').load('/tstatuses/new?user_id=<%=@tconnection.user_id%>&in_reply_to_status_id=<%=status.id%>')" ><img style="vertical-align:top" src="/images/icon-reply.png" /></i></a>
+      <% end %>
+    </div>
+
+
+
+    <strong><%=(status.retweeted_status || status).user.name%></strong> <a target="_blank" style="color:black; opacity: 0.3" class="restore-opacity" href="http://twitter.com/<%=(status.retweeted_status || status).user.screen_name%>">@<%=(status.retweeted_status || status).user.screen_name%></a>
+    <div style="margin-top: 3px; margin-bottom: 6px;">
+      <%= link_tweet(expand_links(status.retweeted_status || status))%>
+
+      <div style="margin-top: 3px">
+        <% if (status.retweeted_status || status).in_reply_to_status_id %>
+          <img style="opacity: 0.3; vertical-align:top" src="/images/icon-reply.png" /> <a target="_blank" style="color:black; opacity: 0.3" class="restore-opacity" href="<%="http://twitter.com/#{status.user.screen_name}/status/#{status.id}"%>">In reply to @<%=(status.retweeted_status || status).in_reply_to_screen_name%></a>
+          <br />
+        <% end %>             
+        <% if status.is_a?(Twitter::Status) %>
+          <% if status.attrs[:retweet_count] > 0 %>
+            <i style="opacity: 0.3; position: relative; top: 1px; margin-right: 2px;" class="icon-retweet"></i>
+            <a title="<%= status.attrs[:retweet_count] %> retweet<%='s' if status.attrs[:retweet_count] > 1%> "style="color: black;" target="_blank" href="<%="http://twitter.com/#{status.user.screen_name}/status/#{status.id}"%>">
+              <span style="opacity: 0.3;">
+                <% if status.retweeted_status %>
+                  Retweeted by <%=status.user.name%>
+                  <% if status.attrs[:retweet_count] > 1 %>
+                    and <%= status.attrs[:retweet_count]-1 %> others
+                  <% end %>
+                <% else %>
+                  <span style="font-weight: bold"><%= status.attrs[:retweet_count] %></span>
+                <% end %>
+              </span>
+            </a> 
+          <% end %>
+          <% if status.favorite_count and status.favorite_count > 0 %>
+            <i style="opacity: 0.3; position: relative; top: 1px; margin-right: 2px;" class="icon-star"></i>
+            <a title="<%= status.favorite_count %> favorite<%='s' if status.favorite_count > 1%> "style="color: black;" target="_blank" href="<%="http://twitter.com/#{status.user.screen_name}/status/#{status.id}"%>">
+              <span style="opacity: 0.3;">
+                <span style="font-weight: bold"><%= status.favorite_count %></span>
+              </span>
+            </a>
+          <% end %>
+        <% end %>            
+      </div>          
+
+    </div>
+
+    <% if status.is_a?(Tstatus) and status.photo %>
+      <img class="thumb" src="<%=status.photo.url%>" />
+    <% elsif status.respond_to?(:media) and status.media %>
+      <% status.media.each { |m| %>
+        <a target="_blank" href="<%=m.url%>"><img class="thumb" style="margin-right: 10px" src="<%=m.media_url%>:thumb" /></a>
+      <% } %>
+    <% end %>
+
+    <div style="margin-bottom: 5px" class="tclaim">
+      <% if status.is_a?(Tstatus) %>
+        <span class="label label-info">
+          Scheduled by <%=status.account.name %>
+        </span>
+        <% if status.approver %>
+          <span class="label label-success">Approved by <%=status.approver.name %></span>            
+          <% if [0,1].include? @tconnection.permissions %>
+            <a class="btn btn-small restore-opacity" style="opacity: 0.33" data-remote="true" href="/tstatuses/<%=status.id%>/unapprove?user_id=<%=@tconnection.user_id%>">Unapprove</a>
+          <% end %>
+        <% else %>
+          <% if [0,1].include? @tconnection.permissions %>
+            <a class="btn btn-small" data-remote="true" href="/tstatuses/<%=status.id%>/approve?user_id=<%=@tconnection.user_id%>">Approve</a>
+          <% else %>
+            <span class="label label-important">Unapproved</span>
+          <% end %>
+        <% end %>
+      <% elsif @panel == 'sent' %>
+        <%= partial :'tclaims/tclaim', :locals => {:status => status} %>
+      <% end %>
+    </div>   
+
+    <% unless ['sent','scheduled'].include?(@panel) %>
+      <div style="margin-bottom: 5px" class="tassign">
+        <%= partial :'tassigns/tassign', :locals => {:status_id => status.id} %>
+      </div>
+    <% end %>
+
+    <% unless @panel == 'search' %>
+      <div data-commentable-id="<%=status.id%>">
+        <%= partial :'comments/comments', :locals => {:connection_type => 't', :user_id => @tconnection.user_id, :panel => @panel, :commentable_id => status.id.to_s} %>
+      </div>    
+    <% end %>
+
+  </td>
+</tr>

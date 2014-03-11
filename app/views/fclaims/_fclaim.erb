@@ -1,0 +1,14 @@
+<% if account = Fclaim.find_by(graph_id: post['id']).try(:account) %>
+  <span class="label label-info">
+    Posted by <%= account.name %>
+  </span>
+  <% if account.id == current_account.id %>
+    <a class="btn btn-small restore-opacity" style="opacity: 0.33" data-remote="true" href="/fclaims/<%=post['id']%>/destroy?user_id=<%=@fconnection.user_id%>">I didn't post this</a>
+  <% end %>
+  </div>
+<% else %>
+  <span class="label">
+    Posted by ?
+  </span>
+  <a class="btn btn-small" data-remote="true" href="/fclaims/<%=post['id']%>?user_id=<%=@fconnection.user_id%>">I posted this</a>
+<% end %>

@@ -1,0 +1,50 @@
+<table class="table table-striped" style="margin-bottom: 0">
+  <tbody>
+    <% Comment.where(:connection_type => connection_type, :user_id => user_id, :panel => panel, :commentable_id => commentable_id).each { |comment| %>
+      <tr class="comment-row">
+        <td>
+          <%= comment.account.name %>
+          <i title="Posted <%=comment.created_at.in_time_zone%>" class="icon-comment"></i>
+          <%= comment.body %>
+          <% if comment.account == current_account %>
+            <a style="float: right" data-remote="true" data-confirm="Are you sure you want to delete this comment?" href="/comments/<%=comment.id%>/destroy"><i title="Delete" class="icon-trash"></i></a>
+          <% end %>
+        </td>
+      </tr>    
+    <% } %>
+    <tr>
+      <td>
+        <%= current_account.name %>
+        <i class="icon-comment"></i>
+        <% form_tag "/comments/new", :onsubmit => '$(this).after(\'&nbsp;<i class="icon-refresh icon-spin"></i>\')', :class => 'form-inline', :style => 'display:inline', :remote => true do %>
+          <input type="hidden" name="connection_type" value="<%=connection_type%>" />
+          <input type="hidden" name="user_id" value="<%=user_id%>" />
+          <input type="hidden" name="panel" value="<%=panel%>" />    
+          <input type="hidden" name="commentable_id" value="<%=commentable_id%>" />
+          <input type="text" name="body" placeholder="Write a comment" />
+        <% end %>
+      </td>
+    </tr>         
+  </tbody>
+</table>
+
+<style>
+  tr.comment-row i.icon-trash { opacity: 0.1 }
+  tr.comment-row:hover i.icon-trash { opacity: 1}  
+</style>
+
+<script>
+  $(function() {
+    var comments = $('[data-commentable-id=<%=commentable_id%>]');
+    if (comments.find('tr').length == 1) {
+      comments.hide();
+      var a = $('<div style="font-size:85%;opacity: 0.15" class="restore-opacity"><a style="text-decoration:none;color:black;" href="javascript:;">Comment <i class="icon-comment"></i></a></div>');
+      a.click(function() {
+        $(this).hide();
+        comments.show();
+        comments.find('input').focus();
+      });
+      a.insertAfter(comments);
+    }
+  });
+</script>

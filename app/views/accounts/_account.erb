@@ -1,0 +1,82 @@
+<div class="modal-header">
+  <a class="close" data-dismiss="modal" >&times;</a>
+  <h3>
+    <% if @account.new_record? %>Sign up<% else %>Edit account<% end %>    
+  </h3>
+</div>
+
+<% form_tag (@account.new_record? ? '/accounts/new' : "/accounts/edit"), :class => 'form-horizontal', :remote => true do %>
+
+  <div class="modal-body">
+
+    <% if @account.errors.empty? %>
+      <% if @account.new_record? %>
+        <div class="alert alert-info">
+          <strong>Sign up with your own name and email address.</strong><br />
+          You'll be able to add Twitter and Facebook accounts in a jot.
+        </div>     
+      <% end %>
+    <% else %>
+      <div class="alert alert-error">
+        <strong>Yuh oh.</strong> We had some problems signing you up:
+        <ul style="margin-top: 6px">
+          <% @account.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+
+
+
+    <div class="control-group">
+      <label class="control-label">Your name</label>
+      <div class="controls">
+        <%= text_field_tag :name, :value => @account.name, :class => 'input-xlarge' %>
+      </div>
+    </div>    
+
+    <div class="control-group">
+      <label class="control-label">Email</label>
+      <div class="controls">
+        <%= text_field_tag :email, :value => @account.email, :class => 'input-xlarge' %>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label">Password</label>
+      <div class="controls">
+        <%= password_field_tag :password, :value => @account.password, :class => 'input-xlarge' %>
+        <% if !@account.new_record? %>
+          <p class="help-block">Leave blank to keep your existing password</p>
+        <% end %>
+      </div>
+    </div>    
+
+    <div class="control-group">
+      <label class="control-label">Password again</label>
+      <div class="controls">
+        <%= password_field_tag :password_confirmation, :value => @account.password_confirmation, :class => 'input-xlarge' %>
+      </div>
+    </div>     
+
+    <div class="control-group">
+      <label class="control-label">Time zone</label>
+      <div class="controls">
+        <%= select_tag :time_zone, :options => ['']+ActiveSupport::TimeZone::MAPPING.keys.sort, :selected => @account.time_zone, :class => 'input-xlarge' %>
+      </div>
+    </div> 
+
+  </div>
+  <div class="modal-footer">   
+    <button data-submit-text="<%= @account.new_record? ? 'Working...' : 'Saving...' %>" class="btn btn-primary" type="submit">
+      <%= @account.new_record? ? 'Sign up' : 'Save' %>
+    </button>   
+    <a href="#" class="btn" data-dismiss="modal" >Close</a>
+    <% if @account.persisted? %>    
+      <a data-confirm="Are you sure you want to delete your account?" class="btn btn-danger" href="/accounts/destroy">Delete account</a>
+    <% end %>    
+  </div>
+<% end %> 
+
