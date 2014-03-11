@@ -2,7 +2,6 @@
 :renderer: erb
 :test: none
 :script: jquery
-:orm: activerecord
+:orm: mongoid
 :mock: none
 :stylesheet: none
-:admin_renderer: erb
