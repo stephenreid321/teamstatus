@@ -34,7 +34,11 @@ module Teamstatus
     end
   
     use Airbrake::Rack  
-    Airbrake.configure do |config| config.api_key = ENV['AIRBRAKE_API_KEY'] end
+    Airbrake.configure do |config|
+      config.api_key = ENV['AIRBRAKE_API_KEY']
+      config.host = ENV['AIRBRAKE_HOST']
+      config.ignore << "Sinatra::NotFound"      
+    end
     error do
       Airbrake.notify(env['sinatra.error'], :session => session)
       erb :error, :layout => :application
